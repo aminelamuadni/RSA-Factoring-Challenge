@@ -1,53 +1,26 @@
 #!/usr/bin/env python3
 
 import sys
-import random
-from math import gcd
-
-def sieve_of_eratosthenes(n):
-    primes = [True] * (n+1)
-    p = 2
-    while p * p <= n:
-        if primes[p]:
-            for i in range(p * p, n+1, p):
-                primes[i] = False
-        p += 1
-    return [p for p in range(2, n+1) if primes[p]]
-
-SMALL_PRIMES = sieve_of_eratosthenes(10000)
-
-def pollards_rho(n):
-    if n % 2 == 0:
-        return 2
-    x = random.randint(1, n-1)
-    y = x
-    c = random.randint(1, n-1)
-    g = 1
-    while g == 1:
-        x = (x*x + c) % n
-        y = (y*y + c) % n
-        y = (y*y + c) % n
-        g = gcd(abs(x-y), n)
-    return g
 
 def factorize(n):
-    for prime in SMALL_PRIMES:
-        if n % prime == 0:
-            return (n // prime, prime)
-    divisor = pollards_rho(n)
-    while divisor == n:
-        divisor = pollards_rho(n)
-    return (n // divisor, divisor)
+    for p in range(2, n):
+        if n % p == 0:
+            return p, n // p
+    return n, 1
 
 def main():
     if len(sys.argv) != 2:
-        print(f"Usage: {sys.argv[0]} <file>")
+        print(f'Usage: {sys.argv[0]} <file>')
         sys.exit(1)
 
-    with open(sys.argv[1], 'r') as f:
-        for line in f:
+    with open(sys.argv[1], 'r') as file:
+        for line in file:
             n = int(line.strip())
             p, q = factorize(n)
+
+            if p > q:
+                p, q = q, p
+
             print(f"{n}={p}*{q}")
 
 if __name__ == "__main__":
