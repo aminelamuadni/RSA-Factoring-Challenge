@@ -2,6 +2,12 @@
 
 import sys
 import random
+import signal
+
+def timeout_handler(signum, frame):
+    raise TimeoutError
+
+signal.signal(signal.SIGALRM, timeout_handler)
 
 def gcd(a, b):
     """Compute the greatest common divisor of a and b."""
@@ -39,12 +45,17 @@ def main():
         print("Usage: rsa <file>")
         sys.exit(1)
 
-    with open(sys.argv[1], 'r') as file:
-        number = int(file.readline().strip())
-        p, q = factorize_rsa(number)
-        if p < q:
-            p, q = q, p
-        print("{}={}*{}".format(number, p, q))
+    signal.alarm(5)
+
+    try:
+        with open(sys.argv[1], 'r') as file:
+            number = int(file.readline().strip())
+            p, q = factorize_rsa(number)
+            if p < q:
+                p, q = q, p
+            print(f"{number}={p}*{q}")
+    except TimeoutError:
+        pass
 
 if __name__ == "__main__":
     main()
