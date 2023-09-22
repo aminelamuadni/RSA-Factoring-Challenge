@@ -4,40 +4,43 @@ import sys
 import random
 
 def gcd(a, b):
+    """Compute the greatest common divisor of a and b."""
     while b:
-        a, b = b, a%b
+        a, b = b, a % b
     return a
 
 def pollard_rho(n):
+    """Use the Pollard rho algorithm to find a divisor of n."""
     if n % 2 == 0:
         return 2
-    x = random.randint(1, n-1)
+    x = random.randint(1, n - 1)
     y = x
-    c = random.randint(1, n-1)
+    c = random.randint(1, n - 1)
     g = 1
     while g == 1:
         x = (x * x + c) % n
         y = (y * y + c) % n
         y = (y * y + c) % n
-        g = gcd(abs(x-y), n)
+        g = gcd(abs(x - y), n)
     return g
 
 def factorize(n):
+    """Return two factors of n."""
     while n % 2 == 0:
-        return (2, n // 2)
+        return 2, n // 2
 
     divisor = n
     while divisor == n:
         divisor = pollard_rho(n)
-    return (divisor, n // divisor)
+    return divisor, n // divisor
 
 def main():
     if len(sys.argv) < 2:
         print("Usage: factors <file>")
         sys.exit(1)
 
-    with open(sys.argv[1], 'r') as f:
-        for line in f:
+    with open(sys.argv[1], 'r') as file:
+        for line in file:
             number = int(line.strip())
             p, q = factorize(number)
             if p < q:
