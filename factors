@@ -2,54 +2,39 @@
 
 import sys
 import random
+from math import gcd
 
-def gcd(a, b):
-    while b:
-        a, b = b, a % b
-    return abs(a)
-
-def pollards_rho(n, iterations=10000):
+def pollards_rho(n):
     if n % 2 == 0:
         return 2
     x = random.randint(1, n-1)
     y = x
     c = random.randint(1, n-1)
-    d = 1
-    for _ in range(iterations):
+    g = 1
+    while g == 1:
         x = (x*x + c) % n
         y = (y*y + c) % n
         y = (y*y + c) % n
-        d = gcd(x-y, n)
-        if 1 < d < n:
-            return d
-    return None
+        g = gcd(abs(x-y), n)
+    return g
 
 def factorize(n):
-    if n % 2 == 0:
-        return 2, n // 2
+    divisor = pollards_rho(n)
+    if divisor == n:
+        return (n, 1)
+    return (n // divisor, divisor)
 
-    factor = pollards_rho(n)
-    if factor is None:  # if failed with default iteration
-        for _ in range(10):  # try 10 more times
-            factor = pollards_rho(n, random.randint(1, 10000))
-            if factor:
-                break
-
-    if factor and factor != n:
-        return factor, n // factor
-    else:
-        return 1, n
-
-def main(filename):
-    with open(filename, 'r') as file:
-        for line in file:
-            n = int(line.strip())
-            p, q = factorize(n)
-            print(f"{n}={max(p, q)}*{min(p, q)}")
-
-if __name__ == "__main__":
+def main():
     if len(sys.argv) != 2:
         print("Usage: factors <file>")
         sys.exit(1)
 
-    main(sys.argv[1])
+    filename = sys.argv[1]
+    with open(filename, "r") as f:
+        for line in f:
+            n = int(line.strip())
+            p, q = factorize(n)
+            print("{}={}*{}".format(n, p, q))
+
+if __name__ == "__main__":
+    main()
